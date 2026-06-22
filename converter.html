@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เครื่องมือแปลงฐานข้อมูล Excel → data.json</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{--bg:#f4f6f8;--card:#fff;--ink:#1f2933;--muted:#647382;--line:#e3e8ee;--brand:#0d7a5f;--brand2:#15a37f;--accent:#0e6e8e;--bad:#dc2626}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Sarabun","Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+  header{background:linear-gradient(120deg,var(--accent),var(--brand2));color:#fff;padding:22px 26px}
+  header h1{margin:0;font-size:1.3rem}
+  header p{margin:4px 0 0;opacity:.9;font-size:.9rem}
+  .wrap{max-width:760px;margin:0 auto;padding:22px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:18px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .drop{border:2px dashed var(--brand2);border-radius:14px;padding:34px;text-align:center;cursor:pointer;background:#f6fbf9;transition:.15s}
+  .drop:hover{background:#eef9f5}
+  .drop strong{color:var(--brand);font-size:1.05rem}
+  .drop small{color:var(--muted)}
+  .btn{padding:11px 20px;border:none;border-radius:10px;background:var(--brand);color:#fff;font-weight:700;cursor:pointer;font-family:inherit;font-size:.95rem}
+  .btn:hover{opacity:.92}
+  .btn:disabled{background:#aebbc4;cursor:not-allowed}
+  .step{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px}
+  .step .n{flex:0 0 28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem}
+  .step .t{font-size:.92rem}
+  code{background:#eef2f5;padding:2px 6px;border-radius:5px;font-size:.85rem}
+  .stat{font-size:.9rem;margin-top:12px}
+  .ok{color:var(--brand);font-weight:700}
+  .err{color:var(--bad);font-weight:700}
+  .hide{display:none}
+  .preview{font-size:.82rem;color:var(--muted);margin-top:8px}
+  table{border-collapse:collapse;width:100%;font-size:.82rem;margin-top:8px}
+  th,td{border:1px solid var(--line);padding:5px 8px;text-align:left}
+  th{background:#eef5f2}
+  td.n,th.n{text-align:right}
+</style>
+</head>
+<body>
+<header>
+  <h1>🔄 เครื่องมือแปลงฐานข้อมูล Excel → data.json</h1>
+  <p>สำหรับอัปเดตฐานข้อมูลกลางของแดชบอร์ดความรอบรู้โรคพิษสุนัขบ้า จ.ลพบุรี</p>
+</header>
+
+<div class="wrap">
+  <div class="panel">
+    <div class="step"><div class="n">1</div><div class="t">ลากไฟล์ Excel ผลตอบกลับ Google Form (โครงสร้างเดิม) เข้ามาด้านล่าง</div></div>
+    <div class="step"><div class="n">2</div><div class="t">กดปุ่ม <b>ดาวน์โหลด data.json</b></div></div>
+    <div class="step"><div class="n">3</div><div class="t">นำไฟล์ <code>data.json</code> ไปวางทับไฟล์เดิมใน repo GitHub (โฟลเดอร์เดียวกับ <code>index.html</code>)</div></div>
+  </div>
+
+  <div class="panel">
+    <div class="drop" id="drop">
+      <strong>⬆️ คลิกหรือลากไฟล์ Excel มาที่นี่</strong><br>
+      <small>ไฟล์ .xlsx จากแบบสำรวจความรอบรู้โรคพิษสุนัขบ้า</small>
+      <input type="file" id="file" accept=".xlsx,.xls" class="hide">
+    </div>
+    <div class="stat" id="stat"></div>
+    <div id="result" class="hide">
+      <div id="previewBox" class="preview"></div>
+      <div style="margin-top:14px">
+        <button class="btn" id="dl">⬇️ ดาวน์โหลด data.json</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="font-size:.86rem;color:var(--muted)">
+    <b style="color:var(--ink)">หมายเหตุ:</b> ไฟล์ <code>data.json</code> จะเก็บเฉพาะคำตอบที่จำเป็นต่อการวิเคราะห์ (อำเภอ ตำบล อายุ อาชีพ คำตอบความรู้ 10 ข้อ พฤติกรรม) — <b>ไม่มี</b>อีเมลหรือข้อมูลระบุตัวบุคคล จึงปลอดภัยที่จะวางบนเว็บสาธารณะ
+  </div>
+</div>
+
+<script>
+// ===== ต้องตรงกับ dashboard ทุกประการ =====
+const COL = {
+  score:'คะแนน', amphoe:'1.อำเภอที่อยู่ปัจจุบัน', age:'2.อายุ', job:'3.อาชีพ',
+  pet:'4.ท่านเลี้ยงสุนัขหรือแมว หรือไม่',
+  vac:'5.กรณีที่เลี้ยงเอง ท่านพาสุนัขหรือแมวไปฉีดวัคซีนป้องกันโรคพิษสุนัขบ้าทุกปี หรือไม่',
+  bite:'7.ในช่วง 6 เดือนที่ผ่านมา ท่านเคยถูกสุนัขหรือแมว กัด-ข่วน จนผิวหนังถลอกหรือมีเลือดออกหรือไม่',
+  action:'8.หากท่านเคยถูกกัด-ข่วน หลังเกิดเหตุการณ์ในทันที (ภายใน 24 ชั่วโมง) ท่านปฏิบัติตนอย่างไร'
+};
+const TAMBON_COLS = ['ตำบล','ตำบล 2','ตำบล 3','ตำบลชัยบาดาล','ตำบลบ้านหมี่','ตำบลท่าวุ้ง','ตำบลท่าหลวง','ตำบลโคกเจริญ','ตำบลสระโบสถ์','ตำบลลำสนธิ','ตำบลหนองม่วง'];
+const KNOW = [
+  ['1. โรคพิษสุนัขบ้าพบได้ในสัตว์เลี้ยงลุกด้วยนมทุกชนิด'],
+  ['2. เมื่อป่วยแล้วรักษาไม่หาย ตายทุกราย ทั้งสัตว์และคน'],
+  ['3. โรคพิษสุนัขบ้าติดต่อโดยการถูกสุนัขบ้ากัด ข่วนและเลียบาดแผล'],
+  ['4. สุนัขบ้ามีอาการทั้งแบบดุร้ายและเซื่องซึม'],
+  ['5. ลูกสุนัขที่อายุต่ำกว่า 3 เดือน เป็นโรคพิษสุนัขบ้าไม่ได้'],
+  ['6.สุนัขที่มีเจ้าของดูแล มักไม่เป็นโรคพิษสุนัขบ้า'],
+  ['7. สัตว์เลี้ยงต้องได้รับการฉีดวัคซีนป้องกันอย่างน้อย ปีละ 2 ครั้ง'],
+  ['8. หากถูกสัตว์เลี้ยงจรจัดกัด แล้วไม่ไปพบแพทย์ มีโอกาสเสียชีวิตจากโรคพิษสุนัขบ้าได้'],
+  ['9. หากท่านถูกสุนัขข่วนหรือเลียแผลเพียงเล็กน้อย ให้ล้างแผลและใส่ยาฆ่าเชื้อเองอยู่ที่บ้าน ไม่ต้องไปพบแพทย์ก็ได้ '],
+  ['10. หากถูกสุนัขไม่ปรากฏเจ้าของกัด  ท่านมีเวลาว่างหรือสะดวกเมื่อใด ค่อยไปพบแพทย์ก็ได้ ไม่ต้องรีบร้อน']
+];
+
+function findKey(headers,target){
+  if(headers.includes(target)) return target;
+  const norm=s=>String(s).replace(/\s+/g,'').trim();
+  const t=norm(target);
+  return headers.find(h=>norm(h)===t)||null;
+}
+function mapRows(rows){
+  if(!rows.length) throw new Error('ไม่พบข้อมูลในไฟล์');
+  const headers=Object.keys(rows[0]);
+  const keys={}; for(const k in COL){ keys[k]=findKey(headers,COL[k]); }
+  if(!keys.amphoe||!keys.score) throw new Error('ไม่พบคอลัมน์อำเภอหรือคะแนน — ตรวจสอบว่าเป็นไฟล์โครงสร้างเดิม');
+  const tamKeys=TAMBON_COLS.map(t=>findKey(headers,t)).filter(Boolean);
+  const knowKeys=KNOW.map(k=>findKey(headers,k[0]));
+  return rows.map(r=>{
+    let tambon=null;
+    for(const tk of tamKeys){ if(r[tk]!=null&&String(r[tk]).trim()!==''){ tambon=String(r[tk]).trim(); break; } }
+    const know=knowKeys.map(kk=>kk?(r[kk]??null):null);
+    return {
+      score: keys.score!=null?Number(r[keys.score]):null,
+      amphoe: r[keys.amphoe]!=null?String(r[keys.amphoe]).trim():null,
+      tambon,
+      age: keys.age?(r[keys.age]||null):null,
+      job: keys.job?(r[keys.job]||null):null,
+      pet: keys.pet?(r[keys.pet]||null):null,
+      vac: keys.vac?(r[keys.vac]||null):null,
+      bite: keys.bite?(r[keys.bite]||null):null,
+      action: keys.action?(r[keys.action]||null):null,
+      know
+    };
+  }).filter(d=>d.amphoe);
+}
+
+let OUT=null;
+const $=id=>document.getElementById(id);
+const drop=$('drop'),file=$('file');
+drop.onclick=()=>file.click();
+drop.ondragover=e=>{e.preventDefault();drop.style.background='#e3f5ee';};
+drop.ondragleave=()=>drop.style.background='';
+drop.ondrop=e=>{e.preventDefault();drop.style.background='';if(e.dataTransfer.files[0])handle(e.dataTransfer.files[0]);};
+file.onchange=e=>{if(e.target.files[0])handle(e.target.files[0]);};
+
+function handle(f){
+  $('stat').innerHTML='⏳ กำลังแปลง '+f.name+' ...';
+  $('result').classList.add('hide');
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const wb=XLSX.read(ev.target.result,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{defval:null});
+      const data=mapRows(rows);
+      const today=new Date().toLocaleDateString('th-TH-u-ca-buddhist',{year:'numeric',month:'long',day:'numeric'});
+      OUT={meta:{updated:today, source:f.name, count:data.length}, rows:data};
+      $('stat').innerHTML='<span class="ok">✅ แปลงสำเร็จ '+data.length.toLocaleString()+' รายการ</span>';
+      // quick preview: count by amphoe
+      const byA={}; data.forEach(d=>{byA[d.amphoe]=(byA[d.amphoe]||0)+1;});
+      const rowsHtml=Object.entries(byA).sort((a,b)=>b[1]-a[1])
+        .map(([a,n])=>`<tr><td>${a}</td><td class="n">${n.toLocaleString()}</td></tr>`).join('');
+      $('previewBox').innerHTML='<b>สรุปจำนวนผู้ตอบรายอำเภอ:</b><table><tr><th>อำเภอ</th><th class="n">ผู้ตอบ</th></tr>'+rowsHtml+'</table>';
+      $('result').classList.remove('hide');
+    }catch(err){ $('stat').innerHTML='<span class="err">❌ '+err.message+'</span>'; }
+  };
+  r.readAsArrayBuffer(f);
+}
+
+$('dl').onclick=()=>{
+  if(!OUT)return;
+  const blob=new Blob([JSON.stringify(OUT)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='data.json'; a.click();
+};
+</script>
+</body>
+</html>
