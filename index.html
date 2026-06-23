@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แดชบอร์ดความรอบรู้โรคพิษสุนัขบ้า จ.ลพบุรี</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg1:#eef3f8; --bg2:#e7f3ee; --card:#ffffff; --ink:#0f1f29; --muted:#6b7a89;
+    --line:#e6ecf2; --line2:#eef2f6;
+    --brand:#0d8b66; --brand2:#13b288; --brandDark:#0a6e52;
+    --good:#16a34a; --warn:#e08a00; --bad:#e0413a; --accent:#0e7faa;
+    --shadow:0 6px 24px rgba(17,40,60,.07); --shadow-sm:0 2px 8px rgba(17,40,60,.05);
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:"Sarabun","Segoe UI",system-ui,sans-serif;
+    background:linear-gradient(160deg,var(--bg1),var(--bg2) 80%);background-attachment:fixed;
+    color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
+
+  /* ---------- header ---------- */
+  header{background:linear-gradient(125deg,var(--brandDark),var(--brand) 45%,var(--brand2));
+    color:#fff;padding:30px 26px 34px;position:relative;overflow:hidden}
+  header::after{content:"";position:absolute;right:-60px;top:-60px;width:260px;height:260px;
+    background:radial-gradient(circle,rgba(255,255,255,.18),transparent 70%);border-radius:50%}
+  header .hwrap{max-width:1200px;margin:0 auto;position:relative;z-index:1}
+  header .badge{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.16);
+    backdrop-filter:blur(4px);padding:5px 13px;border-radius:30px;font-size:.8rem;font-weight:600;margin-bottom:12px}
+  header h1{margin:0;font-size:1.6rem;font-weight:800;letter-spacing:-.01em;line-height:1.25}
+  header p{margin:7px 0 0;opacity:.92;font-size:.94rem;max-width:640px}
+
+  .wrap{max-width:1200px;margin:-18px auto 40px;padding:0 18px;position:relative;z-index:2}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px;margin-bottom:18px;box-shadow:var(--shadow)}
+
+  /* ---------- upload / status ---------- */
+  #uploadPanel{padding:16px 20px}
+  .status{display:flex;align-items:center;gap:10px;font-size:.95rem}
+  .drop{border:2px dashed var(--brand2);border-radius:14px;padding:28px;text-align:center;cursor:pointer;
+    transition:.18s;background:#f3fbf8;margin-top:12px}
+  .drop:hover{background:#e9f8f1;transform:translateY(-1px)}
+  .drop strong{color:var(--brand);font-size:1.05rem}
+  .drop small{color:var(--muted)}
+  .linkbtn{font-size:.82rem;color:var(--accent);cursor:pointer;text-decoration:none}
+  .linkbtn:hover{text-decoration:underline}
+
+  /* ---------- filter bar ---------- */
+  .filterbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.86);
+    backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 18px;margin-bottom:18px;box-shadow:var(--shadow-sm)}
+  .filterbar .ftitle{display:flex;align-items:center;gap:8px;font-weight:700;font-size:.9rem;
+    color:var(--brandDark);margin-bottom:12px}
+  .filters{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+  .field{display:flex;flex-direction:column;gap:5px;flex:1 1 160px;min-width:150px}
+  .field label{font-size:.74rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+  select{padding:10px 12px;border:1.5px solid var(--line);border-radius:11px;font-size:.94rem;
+    font-family:inherit;width:100%;background:#fff;color:var(--ink);cursor:pointer;transition:.15s;
+    appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7a89' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+  select:hover{border-color:var(--brand2)}
+  select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(19,178,136,.15)}
+  .btn{padding:10px 16px;border:none;border-radius:11px;background:var(--brand);color:#fff;
+    font-weight:700;cursor:pointer;font-family:inherit;font-size:.88rem;transition:.15s;white-space:nowrap;
+    display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 6px rgba(13,139,102,.25)}
+  .btn:hover{background:var(--brandDark);transform:translateY(-1px)}
+  .btn.sec{background:#eef3f7;color:var(--ink);box-shadow:none}
+  .btn.sec:hover{background:#e2e9ef}
+  .btn.alt{background:var(--accent);box-shadow:0 2px 6px rgba(14,127,170,.25)}
+  .btn.alt:hover{background:#0a6688}
+  .btnrow{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+
+  /* ---------- active filter chips ---------- */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:#e8f6f1;color:var(--brandDark);
+    padding:5px 6px 5px 12px;border-radius:30px;font-size:.82rem;font-weight:600}
+  .chip b{font-weight:800}
+  .chip.ghost{background:#f1f5f9;color:var(--muted);padding:5px 14px;font-weight:600}
+  .chip button{border:none;background:rgba(13,139,102,.16);color:var(--brandDark);width:20px;height:20px;
+    border-radius:50%;cursor:pointer;font-size:.9rem;line-height:1;display:flex;align-items:center;justify-content:center}
+  .chip button:hover{background:var(--bad);color:#fff}
+
+  /* ---------- KPIs ---------- */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:18px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;
+    position:relative;overflow:hidden;box-shadow:var(--shadow-sm);transition:.18s}
+  .kpi:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+  .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--brand2)}
+  .kpi.k2::before{background:#0e7faa}.kpi.k3::before{background:#16a34a}
+  .kpi.k4::before{background:#e08a00}.kpi.k5::before{background:#7c3aed}
+  .kpi .ic{font-size:1.3rem;opacity:.9}
+  .kpi .v{font-size:1.85rem;font-weight:800;color:var(--ink);line-height:1.1;margin-top:6px}
+  .kpi .l{font-size:.82rem;color:var(--muted);margin-top:4px;font-weight:500}
+
+  /* ---------- tabs ---------- */
+  .tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+  .tab{padding:10px 18px;border-radius:30px;border:1.5px solid var(--line);background:#fff;cursor:pointer;
+    font-weight:700;font-size:.88rem;color:var(--muted);transition:.15s;box-shadow:var(--shadow-sm)}
+  .tab:hover{border-color:var(--brand2);color:var(--brand)}
+  .tab.active{background:linear-gradient(120deg,var(--brand),var(--brand2));color:#fff;border-color:transparent;
+    box-shadow:0 4px 12px rgba(13,139,102,.3)}
+
+  h2{font-size:1.12rem;margin:0 0 6px;font-weight:800}
+  h3{font-size:.92rem;margin:0 0 12px;color:var(--muted);font-weight:700}
+  .note{font-size:.82rem;color:var(--muted);margin:2px 0 14px}
+
+  /* ---------- tables ---------- */
+  .scroll{max-height:560px;overflow:auto;border:1px solid var(--line);border-radius:12px}
+  table{width:100%;border-collapse:collapse;font-size:.88rem}
+  th,td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--line2)}
+  th{background:#f5f8fa;font-weight:700;cursor:pointer;user-select:none;position:sticky;top:0;
+    font-size:.8rem;color:#42525f;z-index:1}
+  th:hover{background:#eaf0f4}
+  tbody tr{transition:.1s}
+  tbody tr:hover{background:#f6fbf9}
+  td.num,th.num{text-align:right}
+  .rank{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;
+    background:#eef3f7;color:#5b6b78;font-weight:800;font-size:.78rem;margin-right:8px}
+  .rank.r1{background:#fde68a;color:#92600a}.rank.r2{background:#e2e8f0;color:#475569}.rank.r3{background:#fed7aa;color:#9a3412}
+  .scorecell{display:flex;align-items:center;gap:9px;justify-content:flex-end}
+  .scoremini{width:60px;height:7px;border-radius:5px;background:#eef2f5;overflow:hidden;flex-shrink:0}
+  .scoremini i{display:block;height:100%;border-radius:5px}
+  .bar{height:9px;border-radius:5px;display:inline-block;vertical-align:middle}
+  .barwrap{background:#eef2f5;border-radius:5px;width:100px;display:inline-block;vertical-align:middle;margin-right:8px;overflow:hidden}
+  .pill{padding:3px 10px;border-radius:20px;font-size:.74rem;font-weight:700;white-space:nowrap}
+  .pill.good{background:#dcfce7;color:#166534}
+  .pill.warn{background:#fef3c7;color:#92400e}
+  .pill.bad{background:#fee2e2;color:#991b1b}
+  .qrow td:first-child{max-width:440px}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:820px){.grid2{grid-template-columns:1fr}}
+  canvas{max-height:300px}
+  .legend{font-size:.8rem;color:var(--muted);margin-top:10px;display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+  .swatch{display:inline-block;width:12px;height:12px;border-radius:4px;margin:0 5px 0 12px;vertical-align:middle}
+  .hide{display:none}
+  .empty{text-align:center;color:#9aa7b2;padding:30px}
+
+  @media(max-width:600px){
+    header h1{font-size:1.3rem}
+    .kpi .v{font-size:1.5rem}
+    .field{flex:1 1 100%}
+  }
+
+  /* ===== print report ===== */
+  .report{display:none}
+  .rpt-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid var(--brand);padding-bottom:10px;margin-bottom:14px}
+  .rpt-title{font-size:1.3rem;font-weight:800;color:var(--brand)}
+  .rpt-sub{font-size:.9rem;color:#444;margin-top:2px}
+  .rpt-meta{text-align:right;font-size:.85rem;color:#333}
+  .rpt-meta #rScope{font-weight:700;font-size:1rem;color:#111}
+  .rpt-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px}
+  .rpt-kpis .k{border:1px solid #ccc;border-radius:8px;padding:8px;text-align:center}
+  .rpt-kpis .k b{display:block;font-size:1.25rem;color:var(--brand)}
+  .rpt-kpis .k span{font-size:.7rem;color:#555}
+  .rpt-h{font-size:1rem;color:var(--brand);border-left:4px solid var(--brand2);padding-left:8px;margin:16px 0 8px}
+  .rpt-tbl{width:100%;border-collapse:collapse;font-size:.78rem}
+  .rpt-tbl th,.rpt-tbl td{border:1px solid #bbb;padding:5px 7px;text-align:left}
+  .rpt-tbl th{background:#eef5f2}
+  .rpt-tbl tr.hdr td{background:#eef5f2;font-weight:700}
+  .rpt-tbl thead{display:table-row-group}
+  .rpt-tbl td.n,.rpt-tbl th.n{text-align:right}
+  .rpt-img{width:100%;max-width:680px;display:block;margin:4px auto}
+  .rpt-cmpcap{font-size:.82rem;color:#444;margin-bottom:4px}
+  .rpt-imggrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .rpt-img2{width:100%;border:1px solid #ddd;border-radius:6px}
+  .rpt-cap{font-size:.8rem;font-weight:700;margin-bottom:3px;color:#333}
+  .rpt-foot{display:flex;justify-content:space-between;margin-top:26px;font-size:.85rem;color:#222}
+
+  @media print{
+    @page{size:A4;margin:14mm}
+    body{background:#fff}
+    header,.wrap{display:none !important}
+    .report{display:block !important}
+    .rpt-h{break-after:avoid}
+    .rpt-tbl,.rpt-img,.rpt-imggrid{break-inside:avoid}
+    .rpt-foot{break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="hwrap">
+    <span class="badge">🛡️ สำนักงานสาธารณสุขจังหวัดลพบุรี · ปี 2569</span>
+    <h1>แดชบอร์ดความรอบรู้โรคพิษสุนัขบ้า</h1>
+    <p>คัดกรอง วิเคราะห์ และสรุปผลแบบสำรวจความรู้ประชาชน แยกรายอำเภอ–รายตำบล พร้อมส่งออกรายงานได้ทันที</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="panel" id="uploadPanel">
+    <div class="status" id="status">⏳ กำลังเชื่อมต่อฐานข้อมูลกลาง...</div>
+    <div id="manualWrap" class="hide">
+      <div class="drop" id="drop">
+        <strong>⬆️ คลิกหรือลากไฟล์ Excel มาวางที่นี่</strong><br>
+        <small>รองรับไฟล์ผลการตอบกลับจาก Google Form (.xlsx) โครงสร้างเดิม</small>
+        <input type="file" id="file" accept=".xlsx,.xls" class="hide">
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <a href="#" id="toggleManual" class="linkbtn">เปิด/ปิด การโหลดไฟล์เอง</a>
+    </div>
+  </div>
+
+  <div id="app" class="hide">
+
+    <div class="filterbar">
+      <div class="ftitle">🔎 ตัวกรองข้อมูล</div>
+      <div class="filters">
+        <div class="field">
+          <label>อำเภอ</label>
+          <select id="fAmphoe"><option value="">ทุกอำเภอ</option></select>
+        </div>
+        <div class="field">
+          <label>ตำบล</label>
+          <select id="fTambon"><option value="">ทุกตำบล</option></select>
+        </div>
+        <div class="field">
+          <label>กลุ่มอายุ</label>
+          <select id="fAge"><option value="">ทุกกลุ่ม</option></select>
+        </div>
+        <div class="field">
+          <label>อาชีพ</label>
+          <select id="fJob"><option value="">ทุกอาชีพ</option></select>
+        </div>
+        <div class="btnrow">
+          <button class="btn sec" id="reset">↺ ล้างตัวกรอง</button>
+          <button class="btn alt" id="exportBtn">⬇️ CSV</button>
+          <button class="btn" id="printBtn">🖨️ PDF</button>
+        </div>
+      </div>
+      <div class="chips" id="chips"></div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi k1"><div class="ic">👥</div><div class="v" id="kN">–</div><div class="l">จำนวนผู้ตอบ (คน)</div></div>
+      <div class="kpi k2"><div class="ic">🧠</div><div class="v" id="kScore">–</div><div class="l">คะแนนความรู้เฉลี่ย (เต็ม 10)</div></div>
+      <div class="kpi k3"><div class="ic">🏅</div><div class="v" id="kPass">–</div><div class="l">ผ่านเกณฑ์ ≥8 คะแนน</div></div>
+      <div class="kpi k4"><div class="ic">💉</div><div class="v" id="kVac">–</div><div class="l">ฉีดวัคซีนสัตว์ทุกปี (เฉพาะผู้เลี้ยง)</div></div>
+      <div class="kpi k5"><div class="ic">🏥</div><div class="v" id="kCorrect">–</div><div class="l">ไปพบแพทย์เมื่อถูกกัด-ข่วน</div></div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-t="area">📍 สรุปรายพื้นที่</div>
+      <div class="tab" data-t="know">🧠 ความรู้รายข้อ</div>
+      <div class="tab" data-t="cmp">⚖️ เปรียบเทียบ 2 กลุ่ม</div>
+      <div class="tab" data-t="behav">🐕 พฤติกรรม</div>
+      <div class="tab" data-t="demo">👥 ข้อมูลทั่วไป</div>
+    </div>
+
+    <!-- AREA -->
+    <div class="tabpane" id="pane-area">
+      <div class="panel">
+        <h2>สรุปคะแนนเฉลี่ยรายพื้นที่</h2>
+        <div class="note" id="areaScope"></div>
+        <div class="scroll">
+          <table id="areaTable">
+            <thead><tr>
+              <th data-k="name">พื้นที่</th>
+              <th class="num" data-k="n">ผู้ตอบ</th>
+              <th class="num" data-k="avg">คะแนนเฉลี่ย</th>
+              <th class="num" data-k="pass">% ผ่าน ≥8</th>
+              <th class="num" data-k="vac">% ฉีดทุกปี</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="note">💡 คลิกหัวตารางเพื่อจัดเรียง · เลือกอำเภอในตัวกรองด้านบนเพื่อเจาะลึกรายตำบล</div>
+      </div>
+    </div>
+
+    <!-- KNOWLEDGE -->
+    <div class="tabpane hide" id="pane-know">
+      <div class="panel">
+        <h2>ความถูกต้องรายข้อ (10 ข้อความรู้)</h2>
+        <div class="scroll">
+          <table id="knowTable">
+            <thead><tr><th>ข้อความ</th><th class="num">% ตอบถูก</th><th style="width:130px">สัดส่วน</th><th class="num">ระดับ</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="legend">เกณฑ์: <span class="pill good">ดี ≥80%</span> <span class="pill warn">พอใช้ 60–79%</span> <span class="pill bad">ควรปรับปรุง &lt;60%</span></div>
+      </div>
+    </div>
+
+    <!-- COMPARE -->
+    <div class="tabpane hide" id="pane-cmp">
+      <div class="panel">
+        <div class="filters" style="margin-bottom:6px">
+          <div class="field">
+            <label>เปรียบเทียบตามตัวแปร</label>
+            <select id="cmpVar">
+              <option value="pet">การเลี้ยงสัตว์ (เลี้ยง / ไม่เลี้ยง)</option>
+              <option value="bite">เคยถูกกัด-ข่วน (เคย / ไม่เคย)</option>
+              <option value="vac">การฉีดวัคซีน (ฉีดทุกปี / ไม่ทุกปี)</option>
+              <option value="age">กลุ่มอายุ (เลือกได้ 2 กลุ่ม)</option>
+              <option value="job">อาชีพ (เลือกได้ 2 กลุ่ม)</option>
+            </select>
+          </div>
+          <div class="field" id="gWrapA"><label>กลุ่ม A</label><select id="cmpA"></select></div>
+          <div class="field" id="gWrapB"><label>กลุ่ม B</label><select id="cmpB"></select></div>
+        </div>
+        <h2 style="margin-top:6px">เปรียบเทียบ % ตอบถูกรายข้อ</h2>
+        <div class="note" id="cmpScope"></div>
+        <canvas id="cCmp" style="max-height:460px"></canvas>
+        <div class="legend">
+          <span class="swatch" style="background:#15a37f"></span><span id="legA">กลุ่ม A</span>
+          <span class="swatch" style="background:#0e6e8e"></span><span id="legB">กลุ่ม B</span>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>ตารางเทียบรายข้อ และส่วนต่าง</h3>
+        <div class="scroll">
+          <table id="cmpTable">
+            <thead><tr>
+              <th>ข้อความรู้</th>
+              <th class="num" id="thA">A</th>
+              <th class="num" id="thB">B</th>
+              <th class="num">ส่วนต่าง</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="note">ส่วนต่าง = กลุ่ม A − กลุ่ม B (เขียว = A สูงกว่า, แดง = A ต่ำกว่า). ตัวเลขในวงเล็บคือจำนวนผู้ตอบของแต่ละกลุ่ม</div>
+      </div>
+    </div>
+
+    <!-- BEHAVIOR -->
+    <div class="tabpane hide" id="pane-behav">
+      <div class="grid2">
+        <div class="panel"><h3>การเลี้ยงสัตว์</h3><canvas id="cPet"></canvas></div>
+        <div class="panel"><h3>การพาสัตว์ไปฉีดวัคซีน (เฉพาะผู้เลี้ยง)</h3><canvas id="cVac"></canvas></div>
+        <div class="panel"><h3>การปฏิบัติหลังถูกกัด-ข่วน</h3><canvas id="cAct"></canvas></div>
+        <div class="panel"><h3>เคยถูกกัด-ข่วนใน 6 เดือน</h3><canvas id="cBite"></canvas></div>
+      </div>
+    </div>
+
+    <!-- DEMO -->
+    <div class="tabpane hide" id="pane-demo">
+      <div class="grid2">
+        <div class="panel"><h3>กลุ่มอายุ</h3><canvas id="cAge"></canvas></div>
+        <div class="panel"><h3>อาชีพ</h3><canvas id="cJob"></canvas></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== PRINT REPORT (hidden on screen, shown only when printing) ===== -->
+<div id="report" class="report">
+  <div class="rpt-head">
+    <div>
+      <div class="rpt-title">รายงานสรุปผลสำรวจความรอบรู้โรคพิษสุนัขบ้า</div>
+      <div class="rpt-sub">สำนักงานสาธารณสุขจังหวัดลพบุรี · ปีงบประมาณ 2569</div>
+    </div>
+    <div class="rpt-meta">
+      <div id="rScope"></div>
+      <div id="rDate"></div>
+    </div>
+  </div>
+
+  <div class="rpt-kpis" id="rKpis"></div>
+
+  <h3 class="rpt-h">1. ผลการตอบความรู้รายข้อ (10 ข้อ)</h3>
+  <table class="rpt-tbl" id="rKnow"></table>
+
+  <h3 class="rpt-h">2. กราฟเปรียบเทียบ % ตอบถูกรายข้อ</h3>
+  <div class="rpt-cmpcap" id="rCmpCap"></div>
+  <img id="rImgCmp" class="rpt-img"/>
+
+  <h3 class="rpt-h">3. ตารางเปรียบเทียบรายข้อ</h3>
+  <table class="rpt-tbl" id="rCmpTbl"></table>
+
+  <h3 class="rpt-h">4. กราฟพฤติกรรมและข้อมูลทั่วไป</h3>
+  <div class="rpt-imggrid">
+    <div><div class="rpt-cap">การเลี้ยงสัตว์</div><img id="rImgPet" class="rpt-img2"/></div>
+    <div><div class="rpt-cap">การฉีดวัคซีน (ผู้เลี้ยง)</div><img id="rImgVac" class="rpt-img2"/></div>
+    <div><div class="rpt-cap">กลุ่มอายุ</div><img id="rImgAge" class="rpt-img2"/></div>
+    <div><div class="rpt-cap">อาชีพ</div><img id="rImgJob" class="rpt-img2"/></div>
+  </div>
+
+  <div class="rpt-foot">
+    <span>ผู้จัดทำ: ______________________________</span>
+    <span>ตำแหน่ง: ______________________________</span>
+    <span>วันที่: ____________________</span>
+  </div>
+</div>
+
+<script>
+// ===================================================================
+//  ⚙️ ตั้งค่าฐานข้อมูลกลาง — แก้ URL นี้ให้ตรงกับ repo ของคุณ
+//  วางไฟล์ data.json ไว้คู่กับไฟล์ index.html นี้บน GitHub Pages
+//  (ค่าเริ่มต้น './data.json' = ไฟล์ในโฟลเดอร์เดียวกัน ใช้ได้เลยไม่ต้องแก้)
+// ===================================================================
+const DATA_URL = './data.json';
+// ===================================================================
+
+// ---------- Column mapping (matches the standard Google Form export) ----------
+const COL = {
+  score:'คะแนน',
+  amphoe:'1.อำเภอที่อยู่ปัจจุบัน',
+  age:'2.อายุ',
+  job:'3.อาชีพ',
+  pet:'4.ท่านเลี้ยงสุนัขหรือแมว หรือไม่',
+  vac:'5.กรณีที่เลี้ยงเอง ท่านพาสุนัขหรือแมวไปฉีดวัคซีนป้องกันโรคพิษสุนัขบ้าทุกปี หรือไม่',
+  bite:'7.ในช่วง 6 เดือนที่ผ่านมา ท่านเคยถูกสุนัขหรือแมว กัด-ข่วน จนผิวหนังถลอกหรือมีเลือดออกหรือไม่',
+  action:'8.หากท่านเคยถูกกัด-ข่วน หลังเกิดเหตุการณ์ในทันที (ภายใน 24 ชั่วโมง) ท่านปฏิบัติตนอย่างไร'
+};
+// All possible tambon columns (Form branches one per district). Coalesced at load.
+const TAMBON_COLS = ['ตำบล','ตำบล 2','ตำบล 3','ตำบลชัยบาดาล','ตำบลบ้านหมี่','ตำบลท่าวุ้ง','ตำบลท่าหลวง','ตำบลโคกเจริญ','ตำบลสระโบสถ์','ตำบลลำสนธิ','ตำบลหนองม่วง'];
+
+// 10 knowledge statements + correct answer (เห็นด้วย = agree)
+const KNOW = [
+  ['1. โรคพิษสุนัขบ้าพบได้ในสัตว์เลี้ยงลุกด้วยนมทุกชนิด','เห็นด้วย'],
+  ['2. เมื่อป่วยแล้วรักษาไม่หาย ตายทุกราย ทั้งสัตว์และคน','เห็นด้วย'],
+  ['3. โรคพิษสุนัขบ้าติดต่อโดยการถูกสุนัขบ้ากัด ข่วนและเลียบาดแผล','เห็นด้วย'],
+  ['4. สุนัขบ้ามีอาการทั้งแบบดุร้ายและเซื่องซึม','เห็นด้วย'],
+  ['5. ลูกสุนัขที่อายุต่ำกว่า 3 เดือน เป็นโรคพิษสุนัขบ้าไม่ได้','ไม่เห็นด้วย'],
+  ['6.สุนัขที่มีเจ้าของดูแล มักไม่เป็นโรคพิษสุนัขบ้า','ไม่เห็นด้วย'],
+  ['7. สัตว์เลี้ยงต้องได้รับการฉีดวัคซีนป้องกันอย่างน้อย ปีละ 2 ครั้ง','เห็นด้วย'],
+  ['8. หากถูกสัตว์เลี้ยงจรจัดกัด แล้วไม่ไปพบแพทย์ มีโอกาสเสียชีวิตจากโรคพิษสุนัขบ้าได้','เห็นด้วย'],
+  ['9. หากท่านถูกสุนัขข่วนหรือเลียแผลเพียงเล็กน้อย ให้ล้างแผลและใส่ยาฆ่าเชื้อเองอยู่ที่บ้าน ไม่ต้องไปพบแพทย์ก็ได้','ไม่เห็นด้วย'],
+  ['10. หากถูกสุนัขไม่ปรากฏเจ้าของกัด  ท่านมีเวลาว่างหรือสะดวกเมื่อใด ค่อยไปพบแพทย์ก็ได้ ไม่ต้องรีบร้อน','ไม่เห็นด้วย']
+];
+
+let RAW=[], DATA=[], charts={};
+if(window.Chart){ Chart.defaults.animation={duration:350}; Chart.defaults.font.family='Sarabun'; Chart.defaults.color='#42525f'; }
+
+// ---- find matching column key (tolerant to minor whitespace differences) ----
+function findKey(headers, target){
+  if(headers.includes(target)) return target;
+  const norm = s=>String(s).replace(/\s+/g,'').trim();
+  const t = norm(target);
+  return headers.find(h=>norm(h)===t) || null;
+}
+
+function mapRows(rows){
+  if(!rows.length) throw new Error('ไม่พบข้อมูลในไฟล์');
+  const headers = Object.keys(rows[0]);
+  const keys={}; for(const k in COL){ keys[k]=findKey(headers,COL[k]); }
+  if(!keys.amphoe || !keys.score) throw new Error('ไม่พบคอลัมน์อำเภอหรือคะแนน — ตรวจสอบว่าเป็นไฟล์โครงสร้างเดิม');
+  const tamKeys = TAMBON_COLS.map(t=>findKey(headers,t)).filter(Boolean);
+  const knowKeys = KNOW.map(k=>findKey(headers,k[0]));
+  return rows.map(r=>{
+    let tambon=null;
+    for(const tk of tamKeys){ if(r[tk]!=null && String(r[tk]).trim()!==''){ tambon=String(r[tk]).trim(); break; } }
+    const know = knowKeys.map((kk,i)=> kk? r[kk] : null);
+    return {
+      score: keys.score!=null ? Number(r[keys.score]) : null,
+      amphoe: r[keys.amphoe]!=null ? String(r[keys.amphoe]).trim() : null,
+      tambon,
+      age: keys.age? (r[keys.age]||null) : null,
+      job: keys.job? (r[keys.job]||null) : null,
+      pet: keys.pet? (r[keys.pet]||null) : null,
+      vac: keys.vac? (r[keys.vac]||null) : null,
+      bite: keys.bite? (r[keys.bite]||null) : null,
+      action: keys.action? (r[keys.action]||null) : null,
+      know
+    };
+  }).filter(d=>d.amphoe);
+}
+
+function loadWorkbook(ab){
+  const wb = XLSX.read(ab,{type:'array'});
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(ws,{defval:null});
+  DATA = mapRows(rows); RAW = DATA;
+}
+
+// data.json holds {meta:{...}, rows:[ already-mapped records ]}
+let META=null;
+function loadFromJSON(obj){
+  if(Array.isArray(obj)){ DATA=obj; META=null; }
+  else { DATA = obj.rows||[]; META = obj.meta||null; }
+  if(!DATA.length) throw new Error('ไฟล์ข้อมูลกลางว่างเปล่า');
+  RAW = DATA;
+}
+
+// ---------- filtering ----------
+function current(){
+  const a=fAmphoe.value, t=fTambon.value, g=fAge.value, j=fJob.value;
+  return DATA.filter(d=>
+    (!a||d.amphoe===a)&&(!t||d.tambon===t)&&(!g||d.age===g)&&(!j||d.job===j));
+}
+
+function uniq(arr){ return [...new Set(arr.filter(x=>x!=null&&x!==''))].sort((x,y)=>String(x).localeCompare(String(y),'th')); }
+
+function fillSelect(sel, items, keep){
+  const cur=keep?sel.value:'';
+  sel.innerHTML='<option value="">'+sel.dataset.all+'</option>'+items.map(i=>`<option ${i===cur?'selected':''}>${i}</option>`).join('');
+}
+
+function initFilters(){
+  fAmphoe.dataset.all='ทุกอำเภอ'; fTambon.dataset.all='ทุกตำบล';
+  fAge.dataset.all='ทุกกลุ่ม'; fJob.dataset.all='ทุกอาชีพ';
+  fillSelect(fAmphoe, uniq(DATA.map(d=>d.amphoe)));
+  fillSelect(fAge, uniq(DATA.map(d=>d.age)));
+  fillSelect(fJob, uniq(DATA.map(d=>d.job)));
+  refreshTambon();
+  refreshCmpSelectors(DATA);
+}
+function refreshTambon(){
+  const a=fAmphoe.value;
+  const pool = a? DATA.filter(d=>d.amphoe===a):DATA;
+  fillSelect(fTambon, uniq(pool.map(d=>d.tambon)));
+}
+
+// ---------- active filter chips ----------
+function renderChips(){
+  const map=[['อำเภอ',fAmphoe],['ตำบล',fTambon],['กลุ่มอายุ',fAge],['อาชีพ',fJob]];
+  const active=map.filter(([l,s])=>s.value);
+  const box=$('chips');
+  if(!active.length){
+    box.innerHTML='<span class="chip ghost">กำลังแสดง: ทั้งจังหวัด (ทุกพื้นที่ ทุกกลุ่ม)</span>';
+    return;
+  }
+  box.innerHTML=active.map(([l,s])=>
+    `<span class="chip">${l}: <b>${s.value}</b><button data-clear="${s.id}" title="ล้าง">×</button></span>`).join('');
+  box.querySelectorAll('button[data-clear]').forEach(b=>b.onclick=()=>{
+    const el=$(b.dataset.clear); el.value='';
+    if(el===fAmphoe){ fTambon.value=''; refreshTambon(); }
+    refreshCmpSelectors(current()); render();
+  });
+}
+
+// ---------- rendering ----------
+function pct(n,d){ return d? Math.round(n/d*1000)/10 : 0; }
+function avg(arr){ const v=arr.filter(x=>!isNaN(x)); return v.length? (v.reduce((a,b)=>a+b,0)/v.length):0; }
+function scoreColor(s){ return s>=8?'var(--good)':s>=6?'var(--warn)':'var(--bad)'; }
+
+function render(){
+  const d=current();
+  // KPIs
+  const scores=d.map(x=>x.score).filter(x=>!isNaN(x));
+  kN.textContent=d.length.toLocaleString();
+  kScore.textContent=scores.length?avg(scores).toFixed(2):'–';
+  kPass.textContent=scores.length?pct(scores.filter(s=>s>=8).length,scores.length)+'%':'–';
+  const owners=d.filter(x=>x.pet==='เลี้ยง');
+  kVac.textContent=owners.length?pct(owners.filter(x=>x.vac&&x.vac.includes('ทุกปี')).length,owners.length)+'%':'–';
+  const bitten=d.filter(x=>x.action!=null);
+  kCorrect.textContent=bitten.length?pct(bitten.filter(x=>x.action.includes('โรงพยาบาล')||x.action.includes('พบแพทย์')).length,bitten.length)+'%':'–';
+
+  renderChips();
+  renderArea(d);
+  renderKnow(d);
+  renderCompare(d);
+  renderBehav(d);
+  renderDemo(d);
+}
+
+let areaSort={k:'avg',dir:-1};
+function renderArea(d){
+  // group by tambon if a district is selected, else by amphoe
+  const byTambon = !!fAmphoe.value;
+  areaScope.textContent = byTambon? `แยกรายตำบลในอำเภอ ${fAmphoe.value}` : 'แยกรายอำเภอ (เลือกอำเภอเพื่อดูรายตำบล)';
+  const key = byTambon? 'tambon':'amphoe';
+  const groups={};
+  d.forEach(x=>{ const g=x[key]||'(ไม่ระบุ)'; (groups[g]=groups[g]||[]).push(x); });
+  let rows=Object.entries(groups).map(([name,arr])=>{
+    const sc=arr.map(a=>a.score).filter(s=>!isNaN(s));
+    const ow=arr.filter(a=>a.pet==='เลี้ยง');
+    return {name, n:arr.length, avg:avg(sc), pass:pct(sc.filter(s=>s>=8).length,sc.length),
+      vac:ow.length?pct(ow.filter(a=>a.vac&&a.vac.includes('ทุกปี')).length,ow.length):0};
+  });
+  rows.sort((a,b)=>{ const x=a[areaSort.k],y=b[areaSort.k];
+    return (typeof x==='string'? x.localeCompare(y,'th'):x-y)*areaSort.dir; });
+  const tb=areaTable.querySelector('tbody');
+  tb.innerHTML=rows.map((r,i)=>{
+    const rk = (areaSort.k==='avg'&&areaSort.dir===-1) ? (i<3?`r${i+1}`:'') : '';
+    const rankCell = (areaSort.k==='avg'&&areaSort.dir===-1) ? `<span class="rank ${rk}">${i+1}</span>` : '';
+    return `<tr>
+      <td>${rankCell}${r.name}</td><td class="num">${r.n}</td>
+      <td class="num"><div class="scorecell"><span class="scoremini"><i style="width:${r.avg*10}%;background:${scoreColor(r.avg)}"></i></span><b style="color:${scoreColor(r.avg)}">${r.avg.toFixed(2)}</b></div></td>
+      <td class="num">${r.pass}%</td><td class="num">${r.vac}%</td></tr>`;
+  }).join('')
+    || '<tr><td colspan="5" class="empty">ไม่มีข้อมูลตามตัวกรองที่เลือก</td></tr>';
+}
+
+function renderKnow(d){
+  const tb=knowTable.querySelector('tbody');
+  tb.innerHTML=KNOW.map((k,i)=>{
+    const ans=d.map(x=>x.know[i]).filter(a=>a!=null&&a!=='');
+    const correct=ans.filter(a=>String(a).trim()===k[1]).length;
+    const p=pct(correct,ans.length);
+    const cls=p>=80?'good':p>=60?'warn':'bad';
+    const lbl=p>=80?'ดี':p>=60?'พอใช้':'ควรปรับปรุง';
+    const col=p>=80?'var(--good)':p>=60?'var(--warn)':'var(--bad)';
+    return `<tr class="qrow"><td>${k[0]}</td>
+      <td class="num"><b>${p}%</b></td>
+      <td><span class="barwrap"><span class="bar" style="width:${p}%;background:${col}"></span></span></td>
+      <td class="num"><span class="pill ${cls}">${lbl}</span></td></tr>`;
+  }).join('');
+}
+
+// ---------- compare two groups ----------
+function correctByQ(subset){
+  return KNOW.map((k,i)=>{
+    const ans=subset.map(x=>x.know[i]).filter(a=>a!=null&&a!=='');
+    return {p:pct(ans.filter(a=>String(a).trim()===k[1]).length,ans.length), n:ans.length};
+  });
+}
+function cmpSplitter(){
+  const v=cmpVar.value;
+  if(v==='pet') return {type:'fixed',A:{label:'เลี้ยงสัตว์',f:x=>x.pet==='เลี้ยง'},B:{label:'ไม่เลี้ยงสัตว์',f:x=>x.pet==='ไม่ได้เลี้ยง'}};
+  if(v==='bite') return {type:'fixed',A:{label:'เคยถูกกัด-ข่วน',f:x=>x.bite==='เคย'},B:{label:'ไม่เคยถูกกัด-ข่วน',f:x=>x.bite==='ไม่เคย'}};
+  if(v==='vac') return {type:'fixed',A:{label:'ฉีดวัคซีนทุกปี',f:x=>x.vac&&x.vac.includes('ทุกปี')},B:{label:'ไม่ได้ฉีดทุกปี',f:x=>x.pet==='เลี้ยง'&&x.vac&&!x.vac.includes('ทุกปี')}};
+  return {type:'pick',field:v};
+}
+function refreshCmpSelectors(d){
+  const sp=cmpSplitter();
+  if(sp.type==='pick'){
+    gWrapA.style.display=''; gWrapB.style.display='';
+    const opts=uniq(d.map(x=>x[sp.field]));
+    const a=cmpA.value,b=cmpB.value;
+    cmpA.innerHTML=opts.map((o,i)=>`<option ${o===a?'selected':(!opts.includes(a)&&i===0?'selected':'')}>${o}</option>`).join('');
+    cmpB.innerHTML=opts.map((o,i)=>`<option ${o===b?'selected':(!opts.includes(b)&&i===1?'selected':'')}>${o}</option>`).join('');
+  }else{ gWrapA.style.display='none'; gWrapB.style.display='none'; }
+}
+function renderCompare(d){
+  const sp=cmpSplitter();
+  let A,B;
+  if(sp.type==='fixed'){
+    A={label:sp.A.label,rows:d.filter(sp.A.f)};
+    B={label:sp.B.label,rows:d.filter(sp.B.f)};
+  }else{
+    const av=cmpA.value,bv=cmpB.value;
+    A={label:av||'(กลุ่ม A)',rows:d.filter(x=>x[sp.field]===av)};
+    B={label:bv||'(กลุ่ม B)',rows:d.filter(x=>x[sp.field]===bv)};
+  }
+  const ca=correctByQ(A.rows), cb=correctByQ(B.rows);
+  const labels=KNOW.map((k,i)=>'ข้อ '+(i+1));
+  legA.textContent=`${A.label} (n=${A.rows.length})`;
+  legB.textContent=`${B.label} (n=${B.rows.length})`;
+  thA.textContent=A.label; thB.textContent=B.label;
+  cmpScope.textContent='ฐานข้อมูลตามตัวกรองปัจจุบัน · ค่าคือร้อยละผู้ตอบถูกในแต่ละข้อ';
+  if(charts.cCmp) charts.cCmp.destroy();
+  charts.cCmp=new Chart(document.getElementById('cCmp'),{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:A.label,data:ca.map(x=>x.p),backgroundColor:'#15a37f',borderRadius:5},
+      {label:B.label,data:cb.map(x=>x.p),backgroundColor:'#0e6e8e',borderRadius:5}
+    ]},
+    options:{responsive:true,
+      plugins:{legend:{position:'top',labels:{font:{family:'Sarabun',size:12}}},
+        tooltip:{callbacks:{title:t=>KNOW[t[0].dataIndex][0],label:c=>c.dataset.label+': '+c.parsed.y+'%'}}},
+      scales:{y:{beginAtZero:true,max:100,title:{display:true,text:'% ตอบถูก',font:{family:'Sarabun'}},ticks:{font:{family:'Sarabun'}}},
+        x:{ticks:{font:{family:'Sarabun'}}}}}
+  });
+  const tb=cmpTable.querySelector('tbody');
+  tb.innerHTML=KNOW.map((k,i)=>{
+    const diff=Math.round((ca[i].p-cb[i].p)*10)/10;
+    const dcol=diff>0?'var(--good)':diff<0?'var(--bad)':'var(--muted)';
+    const sign=diff>0?'+':'';
+    return `<tr class="qrow"><td>${k[0]}</td>
+      <td class="num">${ca[i].p}% <span style="color:#aaa">(${ca[i].n})</span></td>
+      <td class="num">${cb[i].p}% <span style="color:#aaa">(${cb[i].n})</span></td>
+      <td class="num" style="color:${dcol};font-weight:700">${sign}${diff}</td></tr>`;
+  }).join('');
+}
+
+function donut(id,counts,colors){
+  if(charts[id]) charts[id].destroy();
+  const labels=Object.keys(counts), data=Object.values(counts);
+  charts[id]=new Chart(document.getElementById(id),{
+    type:'doughnut',
+    data:{labels,datasets:[{data,backgroundColor:colors||['#15a37f','#0e6e8e','#e08a00','#dc2626','#7c3aed','#64748b','#0891b2','#ca8a04'],borderWidth:2,borderColor:'#fff'}]},
+    options:{cutout:'58%',plugins:{legend:{position:'bottom',labels:{font:{family:'Sarabun',size:11},padding:12,usePointStyle:true}}}}
+  });
+}
+function barChart(id,counts){
+  if(charts[id]) charts[id].destroy();
+  charts[id]=new Chart(document.getElementById(id),{
+    type:'bar',
+    data:{labels:Object.keys(counts),datasets:[{data:Object.values(counts),backgroundColor:'#15a37f',borderRadius:5}]},
+    options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{font:{family:'Sarabun'}}},y:{ticks:{font:{family:'Sarabun',size:10}}}}}
+  });
+}
+function tally(arr){ const o={}; arr.forEach(v=>{ if(v!=null&&v!==''){ const k=String(v); o[k]=(o[k]||0)+1; }}); return o; }
+
+function renderBehav(d){
+  donut('cPet',tally(d.map(x=>x.pet)));
+  donut('cVac',tally(d.filter(x=>x.pet==='เลี้ยง').map(x=>x.vac)));
+  barChart('cAct',tally(d.map(x=>x.action)));
+  donut('cBite',tally(d.map(x=>x.bite)),['#dc2626','#15a37f']);
+}
+function renderDemo(d){
+  barChart('cAge',tally(d.map(x=>x.age)));
+  barChart('cJob',tally(d.map(x=>x.job)));
+}
+
+// ---------- CSV export ----------
+function exportCSV(){
+  const d=current(), byTambon=!!fAmphoe.value, key=byTambon?'tambon':'amphoe';
+  const groups={};
+  d.forEach(x=>{const g=x[key]||'(ไม่ระบุ)';(groups[g]=groups[g]||[]).push(x);});
+  let lines=['พื้นที่,ผู้ตอบ,คะแนนเฉลี่ย,%ผ่าน≥8,%ฉีดทุกปี'];
+  Object.entries(groups).forEach(([name,arr])=>{
+    const sc=arr.map(a=>a.score).filter(s=>!isNaN(s));
+    const ow=arr.filter(a=>a.pet==='เลี้ยง');
+    lines.push([name,arr.length,avg(sc).toFixed(2),pct(sc.filter(s=>s>=8).length,sc.length),
+      ow.length?pct(ow.filter(a=>a.vac&&a.vac.includes('ทุกปี')).length,ow.length):0].join(','));
+  });
+  lines.push('');lines.push('ความรู้รายข้อ,%ตอบถูก');
+  KNOW.forEach((k,i)=>{const ans=d.map(x=>x.know[i]).filter(a=>a!=null&&a!=='');
+    lines.push('"'+k[0].replace(/"/g,'')+'",'+pct(ans.filter(a=>String(a).trim()===k[1]).length,ans.length));});
+  const blob=new Blob(['﻿'+lines.join('\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='สรุปความรอบรู้พิษสุนัขบ้า_'+(fAmphoe.value||'ทุกอำเภอ')+'.csv';a.click();
+}
+
+// ---------- build print report ----------
+function buildReport(){
+  const d=current();
+  const scope = (fAmphoe.value? ('อำเภอ '+fAmphoe.value):'ทุกอำเภอในจังหวัด')
+    + (fTambon.value? (' / ตำบล '+fTambon.value):'')
+    + (fAge.value? (' / '+fAge.value):'')
+    + (fJob.value? (' / '+fJob.value):'');
+  $('rScope').textContent='พื้นที่: '+scope;
+  const now=new Date();
+  const th=now.toLocaleDateString('th-TH-u-ca-buddhist',{year:'numeric',month:'long',day:'numeric'});
+  $('rDate').textContent='พิมพ์เมื่อ: '+th;
+
+  // KPIs (read straight from screen values)
+  $('rKpis').innerHTML=[
+    [kN.textContent,'ผู้ตอบ (คน)'],[kScore.textContent,'คะแนนเฉลี่ย /10'],
+    [kPass.textContent,'ผ่าน ≥8'],[kVac.textContent,'ฉีดทุกปี (ผู้เลี้ยง)'],
+    [kCorrect.textContent,'ไปพบแพทย์เมื่อถูกกัด']
+  ].map(([v,l])=>`<div class="k"><b>${v}</b><span>${l}</span></div>`).join('');
+
+  // knowledge table (header as a normal styled row to avoid print thead-repeat quirks)
+  let kh='<tr class="hdr"><td>ข้อความรู้</td><td class="n">% ตอบถูก</td><td class="n">จำนวนผู้ตอบ</td><td>ระดับ</td></tr>';
+  KNOW.forEach((k,i)=>{
+    const ans=d.map(x=>x.know[i]).filter(a=>a!=null&&a!=='');
+    const p=pct(ans.filter(a=>String(a).trim()===k[1]).length,ans.length);
+    const lbl=p>=80?'ดี':p>=60?'พอใช้':'ควรปรับปรุง';
+    kh+=`<tr><td>${k[0]}</td><td class="n"><b>${p}%</b></td><td class="n">${ans.length}</td><td>${lbl}</td></tr>`;
+  });
+  $('rKnow').innerHTML=kh;
+
+  // compare table + caption (reuse current compare selection)
+  const sp=cmpSplitter();
+  let A,B;
+  if(sp.type==='fixed'){A={label:sp.A.label,rows:d.filter(sp.A.f)};B={label:sp.B.label,rows:d.filter(sp.B.f)};}
+  else{A={label:cmpA.value,rows:d.filter(x=>x[sp.field]===cmpA.value)};B={label:cmpB.value,rows:d.filter(x=>x[sp.field]===cmpB.value)};}
+  $('rCmpCap').textContent=`เปรียบเทียบ: ${A.label} (n=${A.rows.length}) เทียบกับ ${B.label} (n=${B.rows.length})`;
+  const ca=correctByQ(A.rows),cb=correctByQ(B.rows);
+  let ch=`<tr class="hdr"><td>ข้อความรู้</td><td class="n">${A.label}</td><td class="n">${B.label}</td><td class="n">ส่วนต่าง</td></tr>`;
+  KNOW.forEach((k,i)=>{
+    const diff=Math.round((ca[i].p-cb[i].p)*10)/10;
+    ch+=`<tr><td>${k[0]}</td><td class="n">${ca[i].p}%</td><td class="n">${cb[i].p}%</td><td class="n">${diff>0?'+':''}${diff}</td></tr>`;
+  });
+  $('rCmpTbl').innerHTML=ch;
+
+  // chart images (canvas -> PNG)
+  const grab=(c,img)=>{ if(charts[c]) $(img).src=charts[c].canvas.toDataURL('image/png',1); };
+  grab('cCmp','rImgCmp'); grab('cPet','rImgPet'); grab('cVac','rImgVac');
+  grab('cAge','rImgAge'); grab('cJob','rImgJob');
+}
+
+function doPrint(){
+  // Charts in hidden tab panes render at 0x0, so reveal all panes briefly,
+  // force a resize so every canvas has real dimensions, capture, then restore.
+  const panes=[...document.querySelectorAll('.tabpane')];
+  const hidden=panes.map(p=>p.classList.contains('hide'));
+  panes.forEach(p=>p.classList.remove('hide'));
+  render();                                   // (re)draw all charts at full size
+  Object.values(charts).forEach(c=>{try{c.resize();c.render();}catch(e){}});
+  setTimeout(()=>{
+    buildReport();                            // capture canvases -> PNG
+    panes.forEach((p,i)=>{ if(hidden[i]) p.classList.add('hide'); }); // restore tabs
+    setTimeout(()=>window.print(),300);
+  },350);
+}
+
+
+const $=id=>document.getElementById(id);
+const drop=$('drop'),file=$('file');
+drop.onclick=()=>file.click();
+drop.ondragover=e=>{e.preventDefault();drop.style.background='#e3f5ee';};
+drop.ondragleave=()=>drop.style.background='';
+drop.ondrop=e=>{e.preventDefault();drop.style.background='';if(e.dataTransfer.files[0])handle(e.dataTransfer.files[0]);};
+file.onchange=e=>{if(e.target.files[0])handle(e.target.files[0]);};
+
+function showApp(srcLabel){
+  let info = '✅ โหลดสำเร็จ: <b>'+DATA.length.toLocaleString()+'</b> รายการ';
+  if(META && META.updated) info += ' · ฐานข้อมูลปรับปรุง '+META.updated;
+  info += ' · '+srcLabel;
+  $('status').innerHTML=info;
+  $('app').classList.remove('hide');
+  initFilters(); render();
+}
+
+function handle(f){
+  $('status').textContent='⏳ กำลังประมวลผล '+f.name+' ...';
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{ loadWorkbook(ev.target.result); showApp('จากไฟล์ '+f.name);
+      window.scrollTo({top:$('app').offsetTop-20,behavior:'smooth'}); }
+    catch(err){ $('status').innerHTML='❌ '+err.message; }
+  };
+  r.readAsArrayBuffer(f);
+}
+
+// auto-load central database on page open
+async function boot(){
+  try{
+    const res = await fetch(DATA_URL, {cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const obj = await res.json();
+    loadFromJSON(obj);
+    showApp('ฐานข้อมูลกลางออนไลน์');
+  }catch(err){
+    $('status').innerHTML='ℹ️ ยังไม่พบฐานข้อมูลกลาง (data.json) — เปิดโหลดไฟล์เองด้านล่างได้';
+    $('manualWrap').classList.remove('hide');
+  }
+}
+
+fAmphoe.onchange=()=>{refreshTambon();refreshCmpSelectors(current());render();};
+[fTambon,fAge,fJob].forEach(s=>s.onchange=render);
+$('reset').onclick=()=>{fAmphoe.value='';fTambon.value='';fAge.value='';fJob.value='';refreshTambon();render();};
+cmpVar.onchange=()=>{refreshCmpSelectors(current());render();};
+cmpA.onchange=render; cmpB.onchange=render;
+$('exportBtn').onclick=exportCSV;
+$('printBtn').onclick=doPrint;
+
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  document.querySelectorAll('.tabpane').forEach(p=>p.classList.add('hide'));
+  $('pane-'+t.dataset.t).classList.remove('hide');
+});
+areaTable.querySelectorAll('th').forEach(th=>th.onclick=()=>{
+  const k=th.dataset.k; if(!k)return;
+  areaSort.dir = areaSort.k===k? -areaSort.dir : (k==='name'?1:-1);
+  areaSort.k=k; renderArea(current());
+});
+
+$('toggleManual').onclick=e=>{e.preventDefault();$('manualWrap').classList.toggle('hide');};
+
+boot();
+</script>
+</body>
+</html>
